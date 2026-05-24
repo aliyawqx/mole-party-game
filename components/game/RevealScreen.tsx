@@ -20,10 +20,11 @@ export function RevealScreen({ game, monologue, loadingMonologue, onPlayAgain }:
   const accused = score.accusedId
     ? game.participants.find((p) => p.id === score.accusedId)
     : null;
+  const teamWon = !score.moleWins;
 
-  // Confetti on team win (Mole caught)
+  // Confetti only on team win
   useEffect(() => {
-    if (!score.moleWins) {
+    if (teamWon) {
       const fire = (opts: confetti.Options) =>
         confetti({ particleCount: 80, spread: 70, origin: { y: 0.7 }, ...opts });
       fire({ colors: ['#A855F7', '#EC4899', '#22C55E'] });
@@ -35,77 +36,109 @@ export function RevealScreen({ game, monologue, loadingMonologue, onPlayAgain }:
 
   return (
     <div className="w-full max-w-2xl mx-auto flex flex-col items-center gap-6 py-10 px-4">
+      {/* BIG VERDICT BANNER — first thing player sees */}
       <motion.div
-        initial={{ scale: 0.7, opacity: 0, rotate: -10 }}
-        animate={{ scale: 1, opacity: 1, rotate: 0 }}
-        transition={{ type: 'spring', stiffness: 120, damping: 14 }}
+        initial={{ scale: 0.5, opacity: 0, y: -20 }}
+        animate={{ scale: 1, opacity: 1, y: 0 }}
+        transition={{ type: 'spring', stiffness: 140, damping: 14 }}
+        className={`
+          w-full text-center rounded-3xl px-8 py-8 border-2
+          ${teamWon
+            ? 'bg-success/10 border-success/40'
+            : 'bg-pink/10 border-pink/40'}
+        `}
+      >
+        <div className="text-7xl mb-2">
+          {teamWon ? '🏆' : '🎭'}
+        </div>
+        <div className="text-xs uppercase tracking-[0.4em] text-muted font-mono mb-2">
+          Game over
+        </div>
+        <div
+          className={`text-5xl md:text-6xl font-black tracking-tighter ${
+            teamWon ? 'text-success' : 'text-pink'
+          }`}
+        >
+          {teamWon ? 'YOU WIN' : 'MOLE WINS'}
+        </div>
+        <div className="text-sm text-muted mt-3 max-w-md mx-auto">
+          {teamWon
+            ? `You correctly exposed the Mole.`
+            : score.accusationCorrect
+              ? `You caught the Mole — but missed too many words (${score.wordsGuessed}/${score.wordsTotal}). The team failed.`
+              : `The Mole slipped past you. ${accused ? `You accused ${accused.avatar} ${accused.name}, but...` : ''}`}
+        </div>
+      </motion.div>
+
+      {/* Mole identity reveal */}
+      <motion.div
+        initial={{ scale: 0.8, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ delay: 0.3, type: 'spring', stiffness: 120, damping: 14 }}
         className="text-center"
       >
-        <div className="text-7xl mb-2">🎭</div>
-        <div className="text-sm uppercase tracking-[0.3em] text-muted font-mono mb-2">
+        <div className="text-xs uppercase tracking-[0.3em] text-muted font-mono mb-2">
           The Mole was…
         </div>
         <div className="text-5xl mb-1">{mole?.avatar}</div>
-        <div className="text-4xl font-black bg-gradient-to-br from-accent-strong to-pink bg-clip-text text-transparent">
+        <div className="text-3xl font-black bg-gradient-to-br from-accent-strong to-pink bg-clip-text text-transparent">
           {mole?.name}
         </div>
       </motion.div>
 
+      {/* Mole monologue */}
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.4, duration: 0.5 }}
-        className="w-full bg-card border border-border rounded-2xl p-6 min-h-[120px]"
+        transition={{ delay: 0.5, duration: 0.5 }}
+        className="w-full bg-card border border-border rounded-2xl p-6 min-h-[100px]"
       >
         {loadingMonologue ? (
-          <div className="text-muted text-center italic flex items-center justify-center gap-2 h-16">
+          <div className="text-muted text-center italic flex items-center justify-center gap-2 h-12">
             <span>The Mole speaks</span>
             <span className="dot-pulse">
               <span /> <span /> <span />
             </span>
           </div>
         ) : (
-          <p className="text-lg leading-relaxed italic text-foreground/90">
+          <p className="text-base leading-relaxed italic text-foreground/90">
             &ldquo;{monologue ?? '…'}&rdquo;
           </p>
         )}
       </motion.div>
 
+      {/* Side stats (smaller, secondary) */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.7, duration: 0.4 }}
-        className="w-full grid grid-cols-3 gap-3 text-center"
+        className="w-full grid grid-cols-2 gap-3 text-center"
       >
-        <div className="bg-card border border-border rounded-xl p-4">
-          <div className="text-xs uppercase tracking-wider text-muted font-mono">Words</div>
-          <div className="text-3xl font-bold tabular-nums">
+        <div className="bg-card border border-border rounded-xl p-3">
+          <div className="text-[10px] uppercase tracking-wider text-muted font-mono">
+            Words guessed
+          </div>
+          <div className="text-2xl font-bold tabular-nums">
             {score.wordsGuessed}
-            <span className="text-muted text-lg">/{score.wordsTotal}</span>
+            <span className="text-muted text-base">/{score.wordsTotal}</span>
           </div>
         </div>
-        <div className="bg-card border border-border rounded-xl p-4">
-          <div className="text-xs uppercase tracking-wider text-muted font-mono">Accusation</div>
+        <div className="bg-card border border-border rounded-xl p-3">
+          <div className="text-[10px] uppercase tracking-wider text-muted font-mono">
+            Your accusation
+          </div>
           <div
-            className={`text-xl font-bold ${
+            className={`text-sm font-bold mt-0.5 ${
               score.accusationCorrect ? 'text-success' : 'text-danger'
             }`}
           >
-            {score.accusationCorrect ? 'CORRECT' : 'WRONG'}
+            {score.accusationCorrect ? '✓ CORRECT' : '✗ WRONG'}
           </div>
           {accused && (
             <div className="text-xs text-muted truncate">
               {accused.avatar} {accused.name}
             </div>
           )}
-        </div>
-        <div className="bg-card border border-border rounded-xl p-4">
-          <div className="text-xs uppercase tracking-wider text-muted font-mono">Verdict</div>
-          <div
-            className={`text-xl font-bold ${score.moleWins ? 'text-pink' : 'text-success'}`}
-          >
-            {score.moleWins ? 'MOLE WINS' : 'YOU WIN'}
-          </div>
         </div>
       </motion.div>
 
