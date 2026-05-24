@@ -62,7 +62,7 @@ type LocalStore = {
   loadingMonologue: boolean;
   moleMonologue: string | null;
 
-  startGame: (humans: HumanSeed[]) => void;
+  startGame: (humans: HumanSeed[], theme?: ThemeKey) => void;
   beginRound: () => void;
   proceedFromPass: () => void;
   submitHumanClue: (clue: string | null) => void;
@@ -102,8 +102,8 @@ export const useLocalStore = create<LocalStore>((set, get) => ({
   loadingMonologue: false,
   moleMonologue: null,
 
-  startGame: (humans) => {
-    const game = createGame('local', humans, pickRandomTheme());
+  startGame: (humans, theme) => {
+    const game = createGame('local', humans, theme ?? pickRandomTheme());
     set({
       game,
       phase: isHumanMole(game) ? 'mole-briefing-pass' : 'clue-pass',

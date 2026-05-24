@@ -11,6 +11,7 @@ import type { Participant, ClueEntry, BanterLine, AccusationVote } from '@/lib/e
 import { ClueCard } from '@/components/game/ClueCard';
 import { GuessInput } from '@/components/game/GuessInput';
 import { ThemeBadge } from '@/components/game/ThemeBadge';
+import { ThemeSelector } from '@/components/game/ThemeSelector';
 import { RoundBreakdown } from '@/components/game/RoundBreakdown';
 import { ChevronDown, ChevronUp, Scroll } from 'lucide-react';
 import type { Game } from '@/lib/engine/types';
@@ -50,7 +51,7 @@ type ServerMessage =
   | { type: 'state'; view: ClientView; moleId?: string }
   | { type: 'error'; message: string };
 
-const AVATAR_POOL = ['🦊', '🐻', '🐼', '🐯', '🐸', '🐙', '🐨', '🐰', '🦁', '🐵', '🦄', '🦉'];
+const AVATAR_POOL = ['🦊', '🐻', '🐼', '🐯', '🐸', '🐙', '🐨', '🐰', '🦁', '🐵'];
 
 export default function OnlineGame() {
   const params = useParams<{ roomId: string }>();
@@ -59,7 +60,8 @@ export default function OnlineGame() {
   const [view, setView] = useState<ClientView | null>(null);
   const [moleIdRevealed, setMoleIdRevealed] = useState<string | null>(null);
   const [name, setName] = useState('');
-  const [avatar] = useState(() => AVATAR_POOL[Math.floor(Math.random() * AVATAR_POOL.length)]);
+  const [avatar, setAvatar] = useState(() => AVATAR_POOL[Math.floor(Math.random() * AVATAR_POOL.length)]);
+  const [hostThemePick, setHostThemePick] = useState<import('@/lib/engine/types').ThemeKey | null>(null);
   const [joined, setJoined] = useState(false);
   const [connectionError, setConnectionError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
@@ -161,10 +163,33 @@ export default function OnlineGame() {
               {roomId}
             </div>
           </div>
-          <form onSubmit={submitJoin} className="space-y-3">
-            <div className="text-sm text-muted text-center">Pick a name to join</div>
+          <form onSubmit={submitJoin} className="space-y-4">
+            <div className="text-sm text-muted text-center">Pick a name and avatar</div>
+
+            {/* Avatar picker */}
+            <div className="grid grid-cols-5 gap-2">
+              {AVATAR_POOL.map((a) => {
+                const isPicked = avatar === a;
+                return (
+                  <button
+                    type="button"
+                    key={a}
+                    onClick={() => setAvatar(a)}
+                    className={`
+                      text-2xl rounded-xl py-2 border transition
+                      ${isPicked
+                        ? 'border-accent bg-accent/10 scale-105'
+                        : 'border-border bg-card hover:border-accent/40'}
+                    `}
+                  >
+                    {a}
+                  </button>
+                );
+              })}
+            </div>
+
             <div className="flex items-center gap-3">
-              <div className="w-14 h-14 flex items-center justify-center text-3xl bg-card border border-border rounded-xl">
+              <div className="w-14 h-14 flex items-center justify-center text-3xl bg-card border border-accent rounded-xl shrink-0">
                 {avatar}
               </div>
               <input
@@ -177,6 +202,7 @@ export default function OnlineGame() {
                   flex-1 px-4 py-3 rounded-xl
                   bg-card border border-border
                   focus:outline-none focus:border-accent
+                  min-w-0
                 "
                 autoComplete="off"
               />
@@ -269,17 +295,28 @@ export default function OnlineGame() {
           </div>
 
           {isHost ? (
-            <button
-              onClick={() => send({ type: 'start' })}
-              disabled={!canStart}
-              className="
-                w-full py-4 rounded-2xl font-bold
-                bg-gradient-to-r from-accent to-pink text-white
-                hover:opacity-90 transition disabled:opacity-30
-              "
-            >
-              {canStart ? 'Start Game' : 'Need 2+ players'}
-            </button>
+            <div className="space-y-4">
+              <ThemeSelector selected={hostThemePick} onChange={setHostThemePick} />
+              <button
+                onClick={() => {
+                  const resolved =
+                    hostThemePick ??
+                    (() => {
+                      const all = ['general', 'food', 'movies', 'animals', 'scifi'] as const;
+                      return all[Math.floor(Math.random() * all.length)];
+                    })();
+                  send({ type: 'start', theme: resolved });
+                }}
+                disabled={!canStart}
+                className="
+                  w-full py-4 rounded-2xl font-bold
+                  bg-gradient-to-r from-accent to-pink text-white
+                  hover:opacity-90 transition disabled:opacity-30
+                "
+              >
+                {canStart ? 'Start Game' : 'Need 2+ players'}
+              </button>
+            </div>
           ) : (
             <div className="text-center text-sm text-muted py-4 flex items-center justify-center gap-2">
               <Loader2 size={14} className="animate-spin" />

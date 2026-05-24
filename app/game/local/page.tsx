@@ -64,8 +64,8 @@ export default function LocalPage() {
         <TopBar theme={game?.theme} />
         <div className="flex-1 flex items-center justify-center">
           <LocalSetup
-            onStart={(humans) => {
-              startGame(humans);
+            onStart={(humans, theme) => {
+              startGame(humans, theme);
             }}
           />
         </div>

@@ -10,6 +10,7 @@ import { GuessInput } from '@/components/game/GuessInput';
 import { AccusationView } from '@/components/game/AccusationView';
 import { RevealScreen } from '@/components/game/RevealScreen';
 import { ThemeBadge } from '@/components/game/ThemeBadge';
+import { GameStartIntro } from '@/components/game/GameStartIntro';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 
@@ -26,13 +27,16 @@ export default function SoloPage() {
     castAccusation,
   } = useSoloStore();
 
-  useEffect(() => {
-    if (!game) startNew();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
+  // Solo: show intro screen with theme picker before starting the game.
+  // The game starts when user clicks "Start" in GameStartIntro.
   if (!game) {
-    return <FullPageLoader label="Setting up the table…" />;
+    return (
+      <GameStartIntro
+        modeName="Solo"
+        modeSubtitle="You vs 5 AI bots — one of them is the Mole"
+        onStart={(theme) => startNew(theme)}
+      />
+    );
   }
 
   const round = game.rounds[game.currentRound];
@@ -313,13 +317,3 @@ function BanterPanel({
   );
 }
 
-function FullPageLoader({ label }: { label: string }) {
-  return (
-    <div className="min-h-screen flex items-center justify-center text-muted">
-      <div className="flex items-center gap-3">
-        <span>{label}</span>
-        <span className="dot-pulse"><span /><span /><span /></span>
-      </div>
-    </div>
-  );
-}

@@ -64,7 +64,7 @@ type ClientView = {
 
 type ClientMessage =
   | { type: 'join'; name: string; avatar: string }
-  | { type: 'start' }
+  | { type: 'start'; theme?: ThemeKey }
   | { type: 'submitClue'; clue: string | null }
   | { type: 'submitGuess'; guess: string | null }
   | { type: 'submitVote'; accusedId: string }
@@ -137,7 +137,7 @@ export default class Server implements Party.Server {
         this.handleJoin(sender, msg.name, msg.avatar);
         break;
       case 'start':
-        this.handleStart(sender);
+        this.handleStart(sender, msg.theme);
         break;
       case 'submitClue':
         this.handleClue(sender, msg.clue);
@@ -185,12 +185,17 @@ export default class Server implements Party.Server {
     this.broadcastState();
   }
 
-  private handleStart(sender: Party.Connection): void {
+  private handleStart(sender: Party.Connection, theme?: ThemeKey): void {
     const pid = this.connectionToParticipant.get(sender.id);
     if (!pid || pid !== this.state.hostId) return;
     if (this.state.phase !== 'lobby') return;
     const humans = this.state.participants.filter((p) => p.kind === 'human');
     if (humans.length < 2) return;
+
+    // If host picked a theme, use it; otherwise keep the random one assigned at room create.
+    if (theme && PACK_KEYS.includes(theme)) {
+      this.state.theme = theme;
+    }
 
     // Fill with AI bots up to 6
     const aiNeeded = PARTICIPANTS_PER_GAME - humans.length;
