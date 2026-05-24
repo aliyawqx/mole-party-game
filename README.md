@@ -1,112 +1,79 @@
-# 🎭 MOLE — AI party word game with a traitor
+# 🎭 MOLE
 
-> An AI-native reimagining of the cooperative party game **Just One**, with a social-deduction twist: one of the players is secretly the **Mole**, sabotaging your guesses without you knowing.
+> **An AI party word game with a hidden traitor.**
+> Play vs 5 LLM-driven bots — one is secretly lying to you.
 
-**🔗 Live:** [mole-party-game.vercel.app](https://mole-party-game.vercel.app)
-**🛠️ Built solo at the nFactorial hackathon — 24 May 2026 (10:00–15:45)**
+**🔗 [mole-party-game.vercel.app](https://mole-party-game.vercel.app)**
 
 ---
 
-## What it is
+## The hook
 
-Each round, a secret word is shown to everyone *except* the **Guesser**. Other players each write a single one-word clue. **Duplicate or synonymous clues cancel out** — you can't both write *"water"* for *river*. The Guesser sees only the surviving clues and tries to guess the word.
+5 AI bots see a secret word. Each writes a single one-word clue. **Duplicate or synonymous clues cancel out** — you, the guesser, only see what survives.
 
-**The Mole twist:** one random player is secretly the Mole. Their job: make you fail without being caught. They use one of two tactics:
-- **Misdirection** — a defensible clue that nudges toward the wrong meaning
-- **Collision** — predict another player's obvious clue and write the same one, cancelling useful info
+But one bot is secretly the **Mole**. Its language model runs a hidden tactic:
 
-After 5 rounds, everyone votes on who the Mole was.
+- **Misdirection** — write a defensible clue that pulls you toward the wrong meaning (for *bank*, write *money* — you think finance, not river-bank)
+- **Collision** — write the same word as another bot to cancel a useful hint
+
+After 5 rounds, accuse one bot. Catch them — you win. Miss — the Mole wins.
+
+---
 
 ## Three modes
 
-| Mode | Players | Status |
+| | Mode | Who |
 |---|---|---|
-| **Solo** | 1 human vs 5 AI bots with distinct personalities | ✅ Ready |
-| **Pass-and-play** | 2–6 humans on one phone, AI fills empty seats — Mole could be anyone | ✅ Ready |
-| **Online** | 2–6 friends on different devices via shareable 4-letter room code, real-time sync over WebSockets, AI fills empty seats | ✅ Ready |
+| 👤 | **Solo** | You vs 5 AI bots |
+| 👥 | **Pass-and-play** | 2–6 friends on one phone, AI fills empty seats — Mole could even be a human player with AI tactical hints |
+| 🌐 | **Online** | Real-time multiplayer via 4-letter room codes |
 
-## The 5 AI bots
+## Five AI personalities
 
-Each AI has a vivid personality that shapes their clues. The Mole role rotates randomly each game — and a single bot's voice stays consistent whether they're sabotaging or playing fair.
+| | Bot | Voice | Example clue (for *river*) |
+|---|---|---|---|
+| 🎓 | Albert | Academic, precise | *tributary*, *meander* |
+| 😎 | kai | Internet, lowercase | *phoenix*, *willow* |
+| 👵 | Edith | Warm, old-fashioned | *fishing*, *baptism* |
+| 🎭 | Wren | Abstract, sensory | *silver*, *whisper* |
+| 🔧 | Otto | Literal, concise | *water*, *flow* |
 
-| Bot | Style | Example clues for *river* |
-|---|---|---|
-| **🎓 Professor Albert** | Academic, precise | *tributary*, *fluvial*, *meander* |
-| **😎 kai** | Internet-online, references | *phoenix*, *willow* |
-| **👵 Grandma Edith** | Warm, old-fashioned | *fishing*, *baptism* |
-| **🎭 Wren (the Poet)** | Abstract, metaphorical | *silver*, *whisper* |
-| **🔧 Otto (the Engineer)** | Literal, concise | *water*, *flow*, *bank* |
+Five themed **word packs**: 🌍 General · 🍕 Food · 🎬 Movies · 🐯 Animals · 🚀 Sci-Fi
+
+---
+
+## What makes it different
+
+- The Mole is an **LLM with strategic prompting** — every game has a fresh, unpredictable saboteur, not a script
+- **No questioning round** — the clues themselves are the evidence; you analyze patterns, not interrogate
+- **Two stacked win conditions** — cooperative word puzzle + traitor hunt
+- After each game, a **round-by-round replay** shows exactly which tactic the AI used and when
+
+---
 
 ## Tech
 
 - **Next.js 16** (App Router) + **React 19** + **TypeScript** + **Tailwind v4**
-- **Anthropic Claude API** (Sonnet 4.6) — drives bot clues, banter, Mole tactics, and the final reveal monologue when `ANTHROPIC_API_KEY` is set; otherwise a richer mock generator with per-personality fallbacks
-- **Zustand** for client state in Solo and Pass-and-play (mode-agnostic engine underneath)
-- **PartyKit** (Cloudflare Durable Objects) for **Online** real-time multiplayer rooms — server-authoritative game state, WebSocket sync, server-side Mole identity privacy
-- **Framer Motion** + **canvas-confetti** for animations and celebration
-- **Vercel** for the web app, **PartyKit cloud** for the room server (auto-deploy from git)
+- **Anthropic Claude (Haiku 4.5)** drives all bot clues, banter, Mole strategy, and the reveal monologue
+- **PartyKit** on Cloudflare Durable Objects for real-time online multiplayer
+- **Zustand** state, **Framer Motion** animations, **canvas-confetti**
+- Deployed on **Vercel** (web) + **PartyKit cloud** (rooms)
 
-## AI is the gameplay, not the decoration
+Batched API calls and prompt caching keep cost at **~$0.02 per game**.
 
-This isn't "use AI somewhere in the project." The game *requires* an LLM that can:
-- Generate clues in 5 distinct voices
-- Secretly play a saboteur role with strategic awareness of other players' likely clues
-- Give a final in-character monologue explaining the rounds in retrospect
+---
 
-Each AI bot has its own system prompt with a personality, a temperature setting, and (when chosen as the Mole) a secret tactical addendum. The Mole's "tactic" (Misdirection vs Collision) is picked server-side per round and injected into the prompt.
-
-## Run locally
+## Run it
 
 ```bash
 git clone https://github.com/aliyawqx/mole-party-game.git
 cd mole-party-game
 npm install
-cp .env.local.example .env.local       # add your ANTHROPIC_API_KEY (optional)
-npm run dev                            # Next.js on :3000
-npx partykit dev                       # PartyKit (Online mode) on :1999
+echo "ANTHROPIC_API_KEY=sk-ant-..." > .env.local
+npm run dev          # web on :3000
+npx partykit dev     # online rooms on :1999
 ```
-
-Open [http://localhost:3000](http://localhost:3000).
-
-To run without an API key (mock clues for development — same setup the production demo uses):
-```bash
-NEXT_PUBLIC_USE_MOCK=1 npm run dev
-```
-
-To deploy the PartyKit server (Online mode):
-```bash
-npx partykit login
-npx partykit deploy
-# then set NEXT_PUBLIC_PARTYKIT_HOST=<your>.partykit.dev in Vercel envvars
-```
-
-## Recording the demo video (≤60 seconds)
-
-Suggested script for the submission video:
-
-| Time | What to show | Voiceover / subtitle |
-|---|---|---|
-| 0:00–0:05 | Landing page — title, 3 modes | "MOLE — a party word game where one player is secretly trying to sabotage you." |
-| 0:05–0:25 | Solo: click Solo, wait for clues, show cancellation animation, type a guess, see ✓/✗ | "Each round, 5 AI bots write a single clue. Duplicate clues cancel out. Try to guess the word." |
-| 0:25–0:45 | Pass-and-play setup → pass-phone transition → one round | "Or play with friends on one phone. Each turn the screen passes — clues stay private." |
-| 0:45–0:55 | Final reveal: 🎭 mask, Mole identity, monologue, confetti | "After 5 rounds, vote on who the Mole was. Each game is a different traitor." |
-| 0:55–0:60 | URL on screen: mole-party-game.vercel.app | — |
-
-**Record with QuickTime** (Cmd+Shift+5 on macOS, area mode) or use the Vercel preview deploy URL on a phone for the pass-and-play segment.
 
 ---
 
-## Hackathon submission
-
-| Criterion | Note |
-|---|---|
-| **Great use of AI** | LLM is the literal core game loop, not a feature |
-| **Original game** | No good Just One on the web; the Mole twist is novel |
-| **UI/UX** | Tailwind v4 dark theme, framer-motion transitions, mobile-friendly pass-phone flow |
-| **Gameplay** | Quick rounds, real social deduction, replay-friendly |
-| **Stability** | Mock-mode fallback if API fails, edge-case handling |
-| **HELL YES** | Bots with personalities + a hidden traitor + a monologue at the end |
-
----
-
-🤖 Built with [Claude Code](https://claude.com/claude-code)
+🎭 Built solo at the **nFactorial hackathon** · 24 May 2026
