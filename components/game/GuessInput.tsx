@@ -24,7 +24,7 @@ export function GuessInput({ onSubmit, disabled = false }: Props) {
   };
 
   return (
-    <form onSubmit={handle} className="w-full max-w-xl flex gap-2">
+    <form onSubmit={handle} className="w-full max-w-xl flex flex-col sm:flex-row gap-2">
       <input
         ref={inputRef}
         type="text"

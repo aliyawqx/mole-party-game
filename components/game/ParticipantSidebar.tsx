@@ -22,7 +22,7 @@ export function ParticipantSidebar({
   teamScore,
 }: Props) {
   return (
-    <aside className="w-full md:w-64 shrink-0 border-r border-border bg-card/40 backdrop-blur-sm md:h-screen flex flex-col">
+    <aside className="hidden md:flex w-64 shrink-0 border-r border-border bg-card/40 backdrop-blur-sm md:h-screen flex-col">
       <div className="px-5 py-4 border-b border-border">
         <div className="flex items-center justify-between">
           <div className="font-mono text-xs text-muted uppercase tracking-wider">

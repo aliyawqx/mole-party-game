@@ -79,7 +79,11 @@ export default function SoloPage() {
       />
 
       <section className="flex-1 flex flex-col">
-        <TopBar />
+        <TopBar
+          round={game.currentRound + 1}
+          totalRounds={game.rounds.length}
+          score={game.teamScore}
+        />
 
         <div className="flex-1 flex flex-col items-center justify-center px-4 py-6 gap-8">
           {/* Word panel */}
@@ -165,7 +169,7 @@ export default function SoloPage() {
   );
 }
 
-function TopBar() {
+function TopBar({ round, totalRounds, score }: { round?: number; totalRounds?: number; score?: number }) {
   return (
     <header className="px-5 py-3 flex items-center justify-between border-b border-border">
       <Link
@@ -175,10 +179,19 @@ function TopBar() {
         <ArrowLeft size={16} />
         <span>Menu</span>
       </Link>
-      <div className="font-mono text-xs uppercase tracking-[0.3em] text-muted">
+      <div className="font-mono text-xs uppercase tracking-[0.3em] text-muted hidden sm:block">
         MOLE · Solo
       </div>
-      <div className="w-12" />
+      {round !== undefined ? (
+        <div className="md:hidden flex items-center gap-3 font-mono text-xs">
+          <span className="text-muted uppercase tracking-wider">
+            R{round}/{totalRounds}
+          </span>
+          <span className="text-success font-bold tabular-nums">{score}</span>
+        </div>
+      ) : (
+        <div className="w-12 md:hidden" />
+      )}
     </header>
   );
 }
