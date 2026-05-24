@@ -71,6 +71,22 @@ To run without an API key (mock clues for development):
 NEXT_PUBLIC_USE_MOCK=1 npm run dev
 ```
 
+## Recording the demo video (≤60 seconds)
+
+Suggested script for the submission video:
+
+| Time | What to show | Voiceover / subtitle |
+|---|---|---|
+| 0:00–0:05 | Landing page — title, 3 modes | "MOLE — a party word game where one player is secretly trying to sabotage you." |
+| 0:05–0:25 | Solo: click Solo, wait for clues, show cancellation animation, type a guess, see ✓/✗ | "Each round, 5 AI bots write a single clue. Duplicate clues cancel out. Try to guess the word." |
+| 0:25–0:45 | Pass-and-play setup → pass-phone transition → one round | "Or play with friends on one phone. Each turn the screen passes — clues stay private." |
+| 0:45–0:55 | Final reveal: 🎭 mask, Mole identity, monologue, confetti | "After 5 rounds, vote on who the Mole was. Each game is a different traitor." |
+| 0:55–0:60 | URL on screen: mole-party-game.vercel.app | — |
+
+**Record with QuickTime** (Cmd+Shift+5 on macOS, area mode) or use the Vercel preview deploy URL on a phone for the pass-and-play segment.
+
+---
+
 ## Hackathon submission
 
 | Criterion | Note |
