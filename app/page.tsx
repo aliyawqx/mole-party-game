@@ -137,28 +137,65 @@ export default function Home() {
                 className="ml-auto text-muted transition-transform group-open:rotate-90"
               />
             </summary>
-            <div className="px-6 pb-6 space-y-3 text-sm leading-relaxed text-foreground/90">
-              <ol className="list-decimal list-inside space-y-2">
-                <li>
-                  Each round, a secret word is shown to everyone except the{" "}
-                  <strong>Guesser</strong>.
-                </li>
-                <li>
-                  Every non-guesser writes a <strong>single one-word clue</strong>.
-                </li>
-                <li>
-                  Clues that <strong>match or are synonyms</strong> get cancelled — the guesser only sees what survives.
-                </li>
-                <li>
-                  Guesser tries to deduce the word from the surviving clues.
-                </li>
-                <li>
-                  After 5 rounds, everyone votes on{" "}
-                  <strong>who the Mole was</strong>.
-                </li>
-              </ol>
-              <div className="pt-2 text-pink">
-                The Mole&apos;s job: write a clue that either misleads or collides on purpose — without being caught.
+            <div className="px-6 pb-6 space-y-4 text-sm leading-relaxed text-foreground/90">
+              {/* The twist first */}
+              <div className="bg-pink/5 border border-pink/30 rounded-xl p-4 space-y-2">
+                <div className="text-pink font-bold text-base">
+                  🎭 The twist
+                </div>
+                <p>
+                  Of the 6 players, <strong>one is secretly the Mole</strong> — a traitor on your team. Nobody knows who.
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+                  <div className="bg-card border border-border rounded-lg p-3">
+                    <div className="text-[10px] uppercase tracking-wider text-success font-mono mb-1">
+                      Team&apos;s goal
+                    </div>
+                    <div>
+                      Find the Mole through 5 rounds of evidence, then vote them out.
+                    </div>
+                  </div>
+                  <div className="bg-card border border-border rounded-lg p-3">
+                    <div className="text-[10px] uppercase tracking-wider text-pink font-mono mb-1">
+                      Mole&apos;s goal
+                    </div>
+                    <div>
+                      Sabotage clues without getting caught. Survive the vote.
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Round mechanic */}
+              <div>
+                <div className="font-bold text-base mb-2">How a round works</div>
+                <ol className="list-decimal list-inside space-y-1.5">
+                  <li>
+                    A secret word is shown to everyone except the{" "}
+                    <strong>Guesser</strong>.
+                  </li>
+                  <li>
+                    Every other player (including the Mole) writes a{" "}
+                    <strong>single one-word clue</strong>.
+                  </li>
+                  <li>
+                    Clues that <strong>match or are synonyms</strong> cancel out — the guesser only sees what survives.
+                  </li>
+                  <li>
+                    The Guesser tries to deduce the word.
+                  </li>
+                </ol>
+                <p className="mt-3 text-muted text-xs">
+                  The Mole hides in plain sight — writes clues like everyone else, but picks ones that mislead the guesser (e.g. for BANK they write &quot;money&quot;, pushing you away from river-bank) or that collide with another player&apos;s likely clue to cancel useful hints.
+                </p>
+              </div>
+
+              {/* End game */}
+              <div>
+                <div className="font-bold text-base mb-2">After 5 rounds</div>
+                <p>
+                  Everyone votes on <strong>who they think is the Mole</strong>. If the majority is right — team wins. If wrong — the Mole escapes and wins.
+                </p>
               </div>
             </div>
           </details>
