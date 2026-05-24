@@ -23,7 +23,7 @@ After 5 rounds, everyone votes on who the Mole was.
 |---|---|---|
 | **Solo** | 1 human vs 5 AI bots with distinct personalities | ✅ Ready |
 | **Pass-and-play** | 2–6 humans on one phone, AI fills empty seats — Mole could be anyone | ✅ Ready |
-| **Online** | 2–6 friends on different devices via shareable 4-letter room code, real-time sync over WebSockets, AI fills empty seats | ✅ Ready (Beta) |
+| **Online** | 2–6 friends on different devices via shareable 4-letter room code, real-time sync over WebSockets, AI fills empty seats | ✅ Ready |
 
 ## The 5 AI bots
 

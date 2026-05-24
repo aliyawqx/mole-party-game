@@ -41,7 +41,7 @@ export default function Home() {
             icon={<Globe size={22} />}
             title="Online"
             subtitle="Play with friends across devices"
-            badge="Beta"
+            badge="Ready"
           />
         </div>
 
