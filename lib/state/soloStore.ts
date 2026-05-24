@@ -98,23 +98,25 @@ export const useSoloStore = create<SoloStore>((set, get) => ({
       }
     }
 
+    // Apply cancellation BEFORE setting clues so cards appear already
+    // in their final state (cancelled = blurred from the start).
+    // No flicker window where the guesser could glimpse the duplicated word.
+    applyCancellation(clues, round.word);
+
     set((s) => {
       if (!s.game) return s;
       const updated = structuredClone(s.game);
       updated.rounds[updated.currentRound].clues = clues;
+      updated.phase = 'guessing';
       return { game: updated, loadingClues: false };
     });
-
-    // automatically apply cancellation after a beat
-    setTimeout(() => get().doCancellation(), 700);
   },
 
   doCancellation: () => {
+    // Cancellation now happens inline in generateClues. Kept for legacy callers.
     set((s) => {
       if (!s.game) return s;
       const updated = structuredClone(s.game);
-      const round = updated.rounds[updated.currentRound];
-      applyCancellation(round.clues, round.word);
       updated.phase = 'guessing';
       return { game: updated };
     });

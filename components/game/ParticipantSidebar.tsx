@@ -66,9 +66,11 @@ export function ParticipantSidebar({
                   {isGuesser ? (
                     <span className="italic">— guessing —</span>
                   ) : clue ? (
-                    <span className={clue.cancelled ? 'line-through opacity-60' : ''}>
-                      &ldquo;{clue.clue}&rdquo;
-                    </span>
+                    clue.cancelled ? (
+                      <span className="text-danger/70 italic">cancelled ✕</span>
+                    ) : (
+                      <span>&ldquo;{clue.clue}&rdquo;</span>
+                    )
                   ) : loadingClues ? (
                     <span className="dot-pulse text-muted">
                       <span /> <span /> <span />
