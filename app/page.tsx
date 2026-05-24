@@ -165,6 +165,20 @@ export default function Home() {
         </div>
       </section>
 
+      {/* FOOTER */}
+      <footer className="px-6 pt-12 pb-10 border-t border-border/40 mt-8">
+        <div className="max-w-4xl mx-auto flex flex-col items-center gap-4 text-center">
+          <div className="flex items-center gap-2">
+            <span className="text-3xl">🎭</span>
+            <span className="text-3xl font-black tracking-tighter bg-gradient-to-br from-accent-strong via-pink to-accent bg-clip-text text-transparent">
+              MOLE
+            </span>
+          </div>
+          <p className="text-sm text-muted max-w-sm">
+            An AI party word game with a hidden traitor.
+          </p>
+        </div>
+      </footer>
     </main>
   );
 }
