@@ -12,7 +12,7 @@ export function getClaude(): Anthropic {
   return _client;
 }
 
-export const MODEL = 'claude-sonnet-4-6';
+export const MODEL = 'claude-haiku-4-5';
 
 /**
  * Extracts plain text from a Message response, joining all text blocks.
