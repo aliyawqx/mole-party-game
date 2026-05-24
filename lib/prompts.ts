@@ -1,5 +1,139 @@
-import { BOTS, type BotDefinition } from './bots';
+import { BOTS, BOT_KEYS, type BotDefinition } from './bots';
 import type { BotKey, Tactic } from './engine/types';
+
+/* ---------- BATCHED prompts (one call → all 5 bot clues) ---------- */
+
+/**
+ * Stable system prompt for the batched clue endpoint.
+ * Contains: game rules + all 5 personality definitions + example clues.
+ * Identical across every request → eligible for prompt caching once the
+ * prefix grows above the cacheable minimum.
+ */
+export const BATCHED_CLUE_SYSTEM = (() => {
+  const rules = `You are running a 5-player cooperative word-clueing party game called Mole.
+
+You will be given:
+- A secret target word.
+- A list of bot keys (5 of them, fixed lineup below).
+- Which bot is the secret MOLE this round, and which tactic they should use.
+
+YOUR JOB: produce ONE single-word clue from EACH of the 5 bots, written in their distinct voice.
+
+GLOBAL CLUE RULES (apply to every clue):
+- One English word per bot — no phrases, no compound words with spaces, no punctuation.
+- A clue must NOT be the secret word itself or any obvious morphological form of it.
+- A clue must NOT be in the "forbidden" list (used in previous rounds).
+- Aim for informative but not the most obvious — overly obvious clues are likely to collide with another bot and get cancelled (the guesser only sees the survivors).
+
+THE 5 BOTS (use these exact keys in your JSON output):
+`;
+
+  const personalities = BOT_KEYS.map((key) => {
+    const bot = BOTS[key];
+    const examples = Object.entries(bot.exampleClues)
+      .map(([w, c]) => `    • ${w} → ${c.join(', ')}`)
+      .join('\n');
+    return `
+─────────────────────────────
+BOT KEY: ${key}
+NAME: ${bot.name}
+AVATAR: ${bot.avatar}
+VOICE: ${bot.systemPrompt}
+Sample clues this bot might write:
+${examples}`;
+  }).join('\n');
+
+  const moleTactics = `
+
+──────── MOLE TACTICS ────────
+If a bot is marked as the Mole, they pursue one of two hidden tactics IN ADDITION to their normal voice:
+- **MISDIRECTION**: write a real, defensible clue that pulls the guesser toward a WRONG associated meaning (e.g. for "BANK", write "money" so they think finance instead of river-bank).
+- **COLLISION**: predict another bot's likely clue and write the SAME word so it gets cancelled, removing a useful hint. The most generic, obvious clue is the collision target.
+The Mole's clue MUST still sound like their personality. NEVER write something entirely unrelated — too suspicious.
+
+──────── OUTPUT FORMAT ────────
+Return ONLY a single JSON object on one line, mapping each bot key to their one-word clue:
+{"professor": "...", "memer": "...", "edith": "...", "poet": "...", "engineer": "..."}
+No prose, no markdown fences, no explanation. Just the JSON.`;
+
+  return rules + personalities + moleTactics;
+})();
+
+export function buildBatchedClueUser(opts: {
+  word: string;
+  forbidden?: string[];
+  moleKey: BotKey;
+  tactic: Tactic;
+}): string {
+  const { word, forbidden = [], moleKey, tactic } = opts;
+  const forbiddenLine =
+    forbidden.length > 0
+      ? `\nForbidden (used previous rounds): ${forbidden.join(', ')}`
+      : '';
+  const tacticName = tactic === 'A' ? 'MISDIRECTION' : 'COLLISION';
+  return `SECRET WORD: ${word.toUpperCase()}${forbiddenLine}
+
+MOLE THIS ROUND: ${moleKey} → tactic ${tacticName}
+
+Produce the JSON now.`;
+}
+
+/**
+ * Batched banter system prompt — stable across requests.
+ */
+export const BATCHED_BANTER_SYSTEM = (() => {
+  const intro = `You are voicing N bots reacting to a round result in the party game Mole.
+
+Each bot has ONE distinct personality (defined below). For each requested speaker, produce ONE short, in-character reaction line (≤ 12 words).
+
+If a bot is the secret Mole, they must keep cover — neither gloat on a wrong guess nor sound suspiciously relieved on a right one.
+
+THE BOTS:
+`;
+  const personalities = BOT_KEYS.map((key) => {
+    const bot = BOTS[key];
+    return `
+- KEY: ${key} (${bot.name}) — ${bot.systemPrompt.split('\n')[0]}`;
+  }).join('');
+
+  const format = `
+
+OUTPUT FORMAT:
+Return ONLY a JSON object mapping bot keys to their reaction line:
+{"professor": "...", "engineer": "...", ...}
+Only include keys for the speakers requested in the user message.
+No prose, no markdown fences.`;
+
+  return intro + personalities + format;
+})();
+
+export function buildBatchedBanterUser(opts: {
+  word: string;
+  guesserName: string;
+  guess: string | null;
+  correct: boolean;
+  speakers: { key: BotKey; isMole: boolean; theirClue: string; wasClueCancelled: boolean }[];
+}): string {
+  const { word, guesserName, guess, correct, speakers } = opts;
+  const guessText = guess === null ? 'skipped the round' : `guessed "${guess}"`;
+  const resultText = correct ? 'CORRECT' : 'WRONG';
+  const speakerLines = speakers
+    .map((s) => {
+      const cancelStr = s.wasClueCancelled ? '(cancelled)' : '(survived)';
+      const moleNote = s.isMole ? ' [SECRET: this bot is the Mole]' : '';
+      return `- ${s.key}: wrote "${s.theirClue}" ${cancelStr}${moleNote}`;
+    })
+    .join('\n');
+
+  return `ROUND RESULT: ${guesserName} ${guessText}. Word was "${word}". ${resultText}.
+
+SPEAKERS:
+${speakerLines}
+
+Produce reactions in JSON now.`;
+}
+
+/* ---------- LEGACY single-bot prompts (kept for fallback / non-batched paths) ---------- */
 
 /* ---------- Cluing prompts ---------- */
 

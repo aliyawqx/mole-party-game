@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
 import { getClaude, MODEL, extractText, extractSingleWord } from '@/lib/claude';
-import { BOTS } from '@/lib/bots';
-import { buildClueSystem, buildClueUser } from '@/lib/prompts';
+import { BATCHED_CLUE_SYSTEM, buildBatchedClueUser } from '@/lib/prompts';
 import { pickMoleTactic } from '@/lib/engine/setup';
 import type { BotKey, Tactic } from '@/lib/engine/types';
 
@@ -30,39 +29,96 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'missing word or bots' }, { status: 400 });
   }
 
+  const moleBot = bots.find((b) => b.isMole);
+  if (!moleBot) {
+    return NextResponse.json({ error: 'no mole in request' }, { status: 400 });
+  }
+  const tactic: Tactic = pickMoleTactic(0);
   const client = getClaude();
 
-  const results = await Promise.all(
-    bots.map(async (b): Promise<ClueResp> => {
-      const bot = BOTS[b.personalityKey];
-      if (!bot) {
-        return { botId: b.id, clue: '...' };
-      }
-      const tactic: Tactic | undefined = b.isMole ? pickMoleTactic(0) : undefined;
-      const system = buildClueSystem(bot, b.isMole, tactic);
-      const user = buildClueUser(word, forbidden);
+  try {
+    const response = await client.messages.create({
+      model: MODEL,
+      max_tokens: 400,
+      temperature: 0.85,
+      system: [
+        {
+          type: 'text',
+          text: BATCHED_CLUE_SYSTEM,
+          cache_control: { type: 'ephemeral' },
+        },
+      ],
+      messages: [
+        {
+          role: 'user',
+          content: buildBatchedClueUser({
+            word,
+            forbidden,
+            moleKey: moleBot.personalityKey,
+            tactic,
+          }),
+        },
+      ],
+    });
 
-      try {
-        const response = await client.messages.create({
-          model: MODEL,
-          max_tokens: 60,
-          temperature: b.isMole ? Math.min(1, bot.temperature + 0.1) : bot.temperature,
-          system,
-          messages: [{ role: 'user', content: user }],
-        });
-        const raw = extractText(response);
-        const clue = extractSingleWord(raw) || '...';
-        return { botId: b.id, clue, tactic };
-      } catch (err) {
-        if (err instanceof Anthropic.APIError) {
-          console.error(`Claude API error (${err.status}) for bot ${b.id}:`, err.message);
-        } else {
-          console.error(`Clue gen failed for bot ${b.id}:`, err);
-        }
-        return { botId: b.id, clue: '...', tactic };
-      }
-    }),
-  );
+    const raw = extractText(response);
+    const parsed = parseClueJSON(raw);
 
-  return NextResponse.json({ clues: results });
+    const result: ClueResp[] = bots.map((b) => {
+      const rawWord = parsed[b.personalityKey];
+      const clue = rawWord ? extractSingleWord(String(rawWord)) : '';
+      return {
+        botId: b.id,
+        clue: clue || '...',
+        tactic: b.isMole ? tactic : undefined,
+      };
+    });
+
+    return NextResponse.json({ clues: result });
+  } catch (err) {
+    if (err instanceof Anthropic.APIError) {
+      console.error(`Clue batched API error (${err.status}):`, err.message);
+    } else {
+      console.error('Clue batched gen failed:', err);
+    }
+    // Graceful fallback: empty clues that all get cancelled by the client.
+    const fallback: ClueResp[] = bots.map((b) => ({
+      botId: b.id,
+      clue: '...',
+      tactic: b.isMole ? tactic : undefined,
+    }));
+    return NextResponse.json({ clues: fallback });
+  }
+}
+
+/**
+ * Best-effort JSON extraction. Claude usually returns the JSON object on a single line,
+ * but sometimes wraps in fences or adds preamble. Try several recovery strategies.
+ */
+function parseClueJSON(raw: string): Record<string, string> {
+  // 1. Direct parse
+  try {
+    return JSON.parse(raw) as Record<string, string>;
+  } catch {
+    /* fall through */
+  }
+  // 2. Strip markdown fences
+  const fenced = raw.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+  if (fenced) {
+    try {
+      return JSON.parse(fenced[1]) as Record<string, string>;
+    } catch {
+      /* fall through */
+    }
+  }
+  // 3. Find first {...} substring
+  const match = raw.match(/\{[\s\S]*?\}/);
+  if (match) {
+    try {
+      return JSON.parse(match[0]) as Record<string, string>;
+    } catch {
+      /* fall through */
+    }
+  }
+  return {};
 }

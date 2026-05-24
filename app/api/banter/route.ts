@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
 import { getClaude, MODEL, extractText } from '@/lib/claude';
-import { BOTS } from '@/lib/bots';
-import { buildBanterSystem, buildBanterUser } from '@/lib/prompts';
+import { BATCHED_BANTER_SYSTEM, buildBatchedBanterUser } from '@/lib/prompts';
 import type { BotKey } from '@/lib/engine/types';
 
 export const runtime = 'nodejs';
@@ -36,49 +35,88 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'missing word or bots' }, { status: 400 });
   }
 
-  // Pick up to maxLines bots to chime in — prefer non-mole speakers, randomize order
+  // Pick up to maxLines speakers (randomized)
   const shuffled = bots.slice().sort(() => Math.random() - 0.5);
   const speakers = shuffled.slice(0, Math.max(1, maxLines));
 
   const client = getClaude();
 
-  const results = await Promise.all(
-    speakers.map(async (b) => {
-      const bot = BOTS[b.personalityKey];
-      if (!bot) return { botId: b.id, line: '...' };
+  try {
+    const response = await client.messages.create({
+      model: MODEL,
+      max_tokens: 250,
+      temperature: 0.9,
+      system: [
+        {
+          type: 'text',
+          text: BATCHED_BANTER_SYSTEM,
+          cache_control: { type: 'ephemeral' },
+        },
+      ],
+      messages: [
+        {
+          role: 'user',
+          content: buildBatchedBanterUser({
+            word,
+            guesserName,
+            guess,
+            correct,
+            speakers: speakers.map((b) => ({
+              key: b.personalityKey,
+              isMole: b.isMole,
+              theirClue: b.theirClue,
+              wasClueCancelled: b.wasClueCancelled,
+            })),
+          }),
+        },
+      ],
+    });
 
-      try {
-        const response = await client.messages.create({
-          model: MODEL,
-          max_tokens: 60,
-          temperature: bot.temperature,
-          system: buildBanterSystem(bot, b.isMole),
-          messages: [
-            {
-              role: 'user',
-              content: buildBanterUser({
-                word,
-                guesserName,
-                guess,
-                correct,
-                theirClue: b.theirClue,
-                wasClueCancelled: b.wasClueCancelled,
-              }),
-            },
-          ],
-        });
-        const line = extractText(response).replace(/^["']|["']$/g, '').trim();
-        return { botId: b.id, line: line || '...' };
-      } catch (err) {
-        if (err instanceof Anthropic.APIError) {
-          console.error(`Banter API error (${err.status}) for bot ${b.id}:`, err.message);
-        } else {
-          console.error(`Banter gen failed for bot ${b.id}:`, err);
-        }
-        return { botId: b.id, line: 'Hmm.' };
-      }
-    }),
-  );
+    const raw = extractText(response);
+    const parsed = parseBanterJSON(raw);
 
-  return NextResponse.json({ banter: results });
+    const results = speakers.map((b) => {
+      const line = String(parsed[b.personalityKey] ?? '').trim();
+      return { botId: b.id, line: cleanLine(line) || '…' };
+    });
+
+    return NextResponse.json({ banter: results });
+  } catch (err) {
+    if (err instanceof Anthropic.APIError) {
+      console.error(`Banter batched API error (${err.status}):`, err.message);
+    } else {
+      console.error('Banter batched gen failed:', err);
+    }
+    const fallback = speakers.map((b) => ({ botId: b.id, line: 'Hmm.' }));
+    return NextResponse.json({ banter: fallback });
+  }
+}
+
+function parseBanterJSON(raw: string): Record<string, string> {
+  try {
+    return JSON.parse(raw) as Record<string, string>;
+  } catch {
+    /* fall through */
+  }
+  const fenced = raw.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+  if (fenced) {
+    try {
+      return JSON.parse(fenced[1]) as Record<string, string>;
+    } catch {
+      /* fall through */
+    }
+  }
+  const match = raw.match(/\{[\s\S]*?\}/);
+  if (match) {
+    try {
+      return JSON.parse(match[0]) as Record<string, string>;
+    } catch {
+      /* fall through */
+    }
+  }
+  return {};
+}
+
+function cleanLine(s: string): string {
+  return s.replace(/^["']|["']$/g, '').trim();
 }
