@@ -64,17 +64,17 @@ function pickGuesserOrder(
     return Array(ROUNDS_PER_GAME).fill(human.id);
   }
 
-  // For local/online: prefer non-Mole humans, then fill from non-Mole AI.
+  // For local/online: guesser MUST be a non-Mole human (AI can't take a guess
+  // turn in pass-and-play — there's no one to hand the phone to). Cycle through
+  // non-Mole humans for the 5 rounds.
   const humans = nonMole.filter((p) => p.kind === 'human');
-  const ais = nonMole.filter((p) => p.kind === 'ai');
-  const pool = [...humans, ...ais];
-  if (pool.length === 0) return [];
-
+  if (humans.length === 0) {
+    // Edge case: every human is the Mole (impossible with one Mole, but defensive).
+    return Array(ROUNDS_PER_GAME).fill(nonMole[0].id);
+  }
   const order: string[] = [];
-  let i = 0;
-  while (order.length < ROUNDS_PER_GAME) {
-    order.push(pool[i % pool.length].id);
-    i++;
+  for (let i = 0; i < ROUNDS_PER_GAME; i++) {
+    order.push(humans[i % humans.length].id);
   }
   return order;
 }
