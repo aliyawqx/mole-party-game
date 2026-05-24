@@ -14,7 +14,8 @@ import { GuessInput } from '@/components/game/GuessInput';
 import { ClueCard } from '@/components/game/ClueCard';
 import { VoteView } from '@/components/game/VoteView';
 import { RevealScreen } from '@/components/game/RevealScreen';
-import type { BotKey } from '@/lib/engine/types';
+import { ThemeBadge } from '@/components/game/ThemeBadge';
+import type { BotKey, ThemeKey } from '@/lib/engine/types';
 
 export default function LocalPage() {
   const {
@@ -60,7 +61,7 @@ export default function LocalPage() {
   if (!game || phase === 'setup') {
     return (
       <main className="min-h-screen flex flex-col">
-        <TopBar />
+        <TopBar theme={game?.theme} />
         <div className="flex-1 flex items-center justify-center">
           <LocalSetup
             onStart={(humans) => {
@@ -131,7 +132,7 @@ export default function LocalPage() {
     if (!mole) return null;
     return (
       <main className="min-h-screen flex flex-col">
-        <TopBar />
+        <TopBar theme={game?.theme} />
         <div className="flex-1 flex items-center justify-center">
           <MoleBriefing player={mole} onAcknowledge={() => beginRound()} />
         </div>
@@ -152,7 +153,7 @@ export default function LocalPage() {
       }));
     return (
       <main className="min-h-screen flex flex-col">
-        <TopBar />
+        <TopBar theme={game?.theme} />
         <div className="flex-1 flex items-center justify-center">
           <HumanClueInput
             player={player}
@@ -171,7 +172,7 @@ export default function LocalPage() {
   if (phase === 'guessing') {
     return (
       <main className="min-h-screen flex flex-col">
-        <TopBar />
+        <TopBar theme={game?.theme} />
         <div className="flex-1 flex flex-col items-center justify-center px-4 py-6 gap-6">
           <div className="text-center">
             <div className="font-mono text-xs uppercase tracking-[0.3em] text-muted mb-2">
@@ -205,7 +206,7 @@ export default function LocalPage() {
   if (phase === 'reveal') {
     return (
       <main className="min-h-screen flex flex-col">
-        <TopBar />
+        <TopBar theme={game?.theme} />
         <div className="flex-1 flex flex-col items-center justify-center px-4 py-6 gap-6">
           <div className="text-center">
             <div className="font-mono text-xs uppercase tracking-[0.3em] text-muted mb-2">
@@ -257,7 +258,7 @@ export default function LocalPage() {
     if (!voter) return null;
     return (
       <main className="min-h-screen flex flex-col">
-        <TopBar />
+        <TopBar theme={game?.theme} />
         <div className="flex-1 flex items-center justify-center">
           <VoteView voter={voter} candidates={game.participants} onVote={submitVote} />
         </div>
@@ -269,7 +270,7 @@ export default function LocalPage() {
   if (phase === 'final-reveal') {
     return (
       <main className="min-h-screen flex flex-col">
-        <TopBar />
+        <TopBar theme={game?.theme} />
         <RevealScreen
           game={game}
           monologue={moleMonologue}
@@ -283,20 +284,23 @@ export default function LocalPage() {
   return null;
 }
 
-function TopBar() {
+function TopBar({ theme }: { theme?: ThemeKey }) {
   return (
-    <header className="px-5 py-3 flex items-center justify-between border-b border-border">
+    <header className="px-5 py-3 flex items-center justify-between border-b border-border gap-3">
       <Link
         href="/"
-        className="flex items-center gap-2 text-sm text-muted hover:text-foreground transition"
+        className="flex items-center gap-2 text-sm text-muted hover:text-foreground transition shrink-0"
       >
         <ArrowLeft size={16} />
         <span>Menu</span>
       </Link>
-      <div className="font-mono text-xs uppercase tracking-[0.3em] text-muted">
-        MOLE · Pass &amp; Play
+      <div className="flex items-center gap-3 flex-1 justify-center min-w-0">
+        <div className="font-mono text-xs uppercase tracking-[0.3em] text-muted truncate">
+          <span className="hidden sm:inline">MOLE · </span>Pass &amp; Play
+        </div>
+        <ThemeBadge theme={theme} />
       </div>
-      <div className="w-12" />
+      <div className="w-12 shrink-0" />
     </header>
   );
 }

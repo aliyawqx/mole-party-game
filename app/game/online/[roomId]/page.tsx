@@ -10,6 +10,7 @@ import PartySocket from 'partysocket';
 import type { Participant, ClueEntry, BanterLine, AccusationVote } from '@/lib/engine/types';
 import { ClueCard } from '@/components/game/ClueCard';
 import { GuessInput } from '@/components/game/GuessInput';
+import { ThemeBadge } from '@/components/game/ThemeBadge';
 
 type OnlinePhase =
   | 'lobby'
@@ -24,6 +25,7 @@ type ClientView = {
   myId: string;
   isMole: boolean;
   hostId: string | null;
+  theme?: import('@/lib/engine/types').ThemeKey;
   participants: Participant[];
   currentRound: number;
   totalRounds: number;
@@ -205,7 +207,7 @@ export default function OnlineGame() {
     const isHost = view.myId === view.hostId;
     const canStart = view.joinedNames.length >= 2;
     return (
-      <Shell title="Online · Lobby">
+      <Shell title="Online · Lobby" theme={view.theme}>
         <div className="m-auto w-full max-w-md px-6 py-12 space-y-6 animate-fade-in">
           <div className="text-center space-y-1">
             <div className="text-sm text-muted uppercase tracking-[0.3em] font-mono">Room</div>
@@ -296,7 +298,7 @@ export default function OnlineGame() {
     const myParticipant = view.participants.find((p) => p.id === view.myId);
     const canClue = myParticipant?.kind === 'human' && !isGuesser && !myHasClued;
     return (
-      <Shell title={`Round ${view.currentRound + 1}/${view.totalRounds}`} score={view.teamScore}>
+      <Shell title={`Round ${view.currentRound + 1}/${view.totalRounds}`} score={view.teamScore} theme={view.theme}>
         <div className="flex-1 flex flex-col items-center justify-center px-4 py-8 gap-6 max-w-md mx-auto w-full">
           <RoleBanner view={view} guesserName={guesser?.name ?? '?'} />
 
@@ -321,7 +323,7 @@ export default function OnlineGame() {
 
   if (view.phase === 'guessing') {
     return (
-      <Shell title={`Round ${view.currentRound + 1}/${view.totalRounds}`} score={view.teamScore}>
+      <Shell title={`Round ${view.currentRound + 1}/${view.totalRounds}`} score={view.teamScore} theme={view.theme}>
         <div className="flex-1 flex flex-col items-center justify-center px-4 py-6 gap-6">
           <div className="text-center">
             <div className="font-mono text-xs uppercase tracking-[0.3em] text-muted mb-2">
@@ -395,29 +397,34 @@ export default function OnlineGame() {
 function Shell({
   title,
   score,
+  theme,
   children,
 }: {
   title: string;
   score?: number;
+  theme?: import('@/lib/engine/types').ThemeKey;
   children: React.ReactNode;
 }) {
   return (
     <main className="min-h-screen flex flex-col">
-      <header className="px-5 py-3 flex items-center justify-between border-b border-border">
+      <header className="px-5 py-3 flex items-center justify-between border-b border-border gap-3">
         <Link
           href="/"
-          className="flex items-center gap-2 text-sm text-muted hover:text-foreground transition"
+          className="flex items-center gap-2 text-sm text-muted hover:text-foreground transition shrink-0"
         >
           <ArrowLeft size={16} />
           <span>Menu</span>
         </Link>
-        <div className="font-mono text-xs uppercase tracking-[0.3em] text-muted">
-          {title}
+        <div className="flex items-center gap-3 flex-1 justify-center min-w-0">
+          <div className="font-mono text-xs uppercase tracking-[0.3em] text-muted truncate">
+            {title}
+          </div>
+          <ThemeBadge theme={theme} />
         </div>
         {score !== undefined ? (
-          <div className="font-mono text-xs text-success font-bold tabular-nums">{score}</div>
+          <div className="font-mono text-xs text-success font-bold tabular-nums shrink-0">{score}</div>
         ) : (
-          <div className="w-12" />
+          <div className="w-12 shrink-0" />
         )}
       </header>
       {children}
@@ -536,7 +543,7 @@ function RevealPhase({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   return (
-    <Shell title={`Round ${view.currentRound + 1}/${view.totalRounds}`} score={view.teamScore}>
+    <Shell title={`Round ${view.currentRound + 1}/${view.totalRounds}`} score={view.teamScore} theme={view.theme}>
       <div className="flex-1 flex flex-col items-center justify-center px-4 py-6 gap-6">
         <div className="text-center">
           <div className="font-mono text-xs uppercase tracking-[0.3em] text-muted mb-2">

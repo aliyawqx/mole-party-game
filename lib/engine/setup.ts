@@ -1,6 +1,6 @@
-import type { Mode, Participant, Game, Tactic } from './types';
+import type { Mode, Participant, Game, Tactic, ThemeKey } from './types';
 import { BOT_KEYS, BOTS } from '../bots';
-import { pickRandomWords } from '../words';
+import { pickWordsFromPack } from '../word-packs';
 import { ROUNDS_PER_GAME, PARTICIPANTS_PER_GAME } from './types';
 
 export type HumanSeed = {
@@ -79,7 +79,11 @@ function pickGuesserOrder(
   return order;
 }
 
-export function createGame(mode: Mode, humans: HumanSeed[]): Game {
+export function createGame(
+  mode: Mode,
+  humans: HumanSeed[],
+  theme: ThemeKey = 'general',
+): Game {
   if (mode === 'solo' && humans.length !== 1) {
     throw new Error('Solo mode requires exactly 1 human');
   }
@@ -102,10 +106,11 @@ export function createGame(mode: Mode, humans: HumanSeed[]): Game {
   }
 
   const guesserOrder = pickGuesserOrder(mode, participants, moleId);
-  const words = pickRandomWords(ROUNDS_PER_GAME);
+  const words = pickWordsFromPack(theme, ROUNDS_PER_GAME);
 
   return {
     mode,
+    theme,
     participants,
     moleId,
     guesserOrder,

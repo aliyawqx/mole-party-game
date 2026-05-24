@@ -9,6 +9,7 @@ import { ClueCard } from '@/components/game/ClueCard';
 import { GuessInput } from '@/components/game/GuessInput';
 import { AccusationView } from '@/components/game/AccusationView';
 import { RevealScreen } from '@/components/game/RevealScreen';
+import { ThemeBadge } from '@/components/game/ThemeBadge';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 
@@ -83,6 +84,7 @@ export default function SoloPage() {
           round={game.currentRound + 1}
           totalRounds={game.rounds.length}
           score={game.teamScore}
+          theme={game.theme}
         />
 
         <div className="flex-1 flex flex-col items-center justify-center px-4 py-6 gap-8">
@@ -169,21 +171,35 @@ export default function SoloPage() {
   );
 }
 
-function TopBar({ round, totalRounds, score }: { round?: number; totalRounds?: number; score?: number }) {
+function TopBar({
+  round,
+  totalRounds,
+  score,
+  theme,
+}: {
+  round?: number;
+  totalRounds?: number;
+  score?: number;
+  theme?: import('@/lib/engine/types').ThemeKey;
+}) {
   return (
-    <header className="px-5 py-3 flex items-center justify-between border-b border-border">
+    <header className="px-5 py-3 flex items-center justify-between border-b border-border gap-3">
       <Link
         href="/"
-        className="flex items-center gap-2 text-sm text-muted hover:text-foreground transition"
+        className="flex items-center gap-2 text-sm text-muted hover:text-foreground transition shrink-0"
       >
         <ArrowLeft size={16} />
         <span>Menu</span>
       </Link>
-      <div className="font-mono text-xs uppercase tracking-[0.3em] text-muted hidden sm:block">
-        MOLE · Solo
+      <div className="hidden sm:flex items-center gap-3">
+        <div className="font-mono text-xs uppercase tracking-[0.3em] text-muted">
+          MOLE · Solo
+        </div>
+        <ThemeBadge theme={theme} />
       </div>
       {round !== undefined ? (
-        <div className="md:hidden flex items-center gap-3 font-mono text-xs">
+        <div className="md:hidden flex items-center gap-2 font-mono text-xs">
+          <ThemeBadge theme={theme} />
           <span className="text-muted uppercase tracking-wider">
             R{round}/{totalRounds}
           </span>

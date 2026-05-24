@@ -6,11 +6,12 @@ import type {
   ClueEntry,
   BanterLine,
   AccusationVote,
+  ThemeKey,
 } from '../lib/engine/types';
 import { ROUNDS_PER_GAME, PARTICIPANTS_PER_GAME } from '../lib/engine/types';
 import { applyCancellation, isCorrectGuess } from '../lib/engine/cancellation';
 import { BOTS, BOT_KEYS } from '../lib/bots';
-import { pickRandomWords } from '../lib/words';
+import { pickWordsFromPack, PACK_KEYS } from '../lib/word-packs';
 import { mockGenerateClues, mockGenerateBanter } from '../lib/mock-clues';
 
 type OnlinePhase =
@@ -23,6 +24,7 @@ type OnlinePhase =
 
 type RoomState = {
   phase: OnlinePhase;
+  theme: ThemeKey;
   participants: Participant[]; // humans + AI fill
   hostId: string | null;
   // server-only secret
@@ -48,6 +50,7 @@ type ClientView = {
   myId: string;
   isMole: boolean;
   hostId: string | null;
+  theme: ThemeKey;
   participants: Participant[];
   currentRound: number;
   totalRounds: number;
@@ -81,6 +84,7 @@ function shuffle<T>(arr: T[]): T[] {
 export default class Server implements Party.Server {
   state: RoomState = {
     phase: 'lobby',
+    theme: PACK_KEYS[Math.floor(Math.random() * PACK_KEYS.length)],
     participants: [],
     hostId: null,
     moleId: '',
@@ -214,7 +218,7 @@ export default class Server implements Party.Server {
     const nonMoleHumans = nonMole.filter((p) => p.kind === 'human');
     const guesserPool = nonMoleHumans.length > 0 ? nonMoleHumans : nonMole;
 
-    const words = pickRandomWords(ROUNDS_PER_GAME);
+    const words = pickWordsFromPack(this.state.theme, ROUNDS_PER_GAME);
     this.state.rounds = words.map((word, i) => ({
       word,
       guesserId: guesserPool[i % guesserPool.length].id,
@@ -383,6 +387,7 @@ export default class Server implements Party.Server {
       myId: pid ?? '',
       isMole: this.state.phase === 'final-reveal' ? false : isMole,
       hostId: this.state.hostId,
+      theme: this.state.theme,
       participants: this.state.participants,
       currentRound: this.state.currentRound,
       totalRounds: this.state.rounds.length,

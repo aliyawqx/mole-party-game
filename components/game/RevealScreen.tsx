@@ -1,11 +1,13 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
+import { ChevronDown, ChevronUp, Scroll } from 'lucide-react';
 import type { Game } from '@/lib/engine/types';
 import { computeScore } from '@/lib/engine/scoring';
+import { RoundBreakdown } from './RoundBreakdown';
 
 type Props = {
   game: Game;
@@ -21,6 +23,7 @@ export function RevealScreen({ game, monologue, loadingMonologue, onPlayAgain }:
     ? game.participants.find((p) => p.id === score.accusedId)
     : null;
   const teamWon = !score.moleWins;
+  const [showBreakdown, setShowBreakdown] = useState(false);
 
   // Confetti only on team win
   useEffect(() => {
@@ -140,6 +143,42 @@ export function RevealScreen({ game, monologue, loadingMonologue, onPlayAgain }:
             </div>
           )}
         </div>
+      </motion.div>
+
+      {/* Round breakdown toggle */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.85, duration: 0.4 }}
+        className="w-full"
+      >
+        <button
+          onClick={() => setShowBreakdown((v) => !v)}
+          className="
+            w-full flex items-center justify-center gap-2 py-3
+            text-sm font-medium text-muted hover:text-foreground transition
+            border border-border rounded-xl hover:bg-card-hover
+          "
+        >
+          <Scroll size={14} />
+          <span>{showBreakdown ? 'Hide round breakdown' : 'See round-by-round replay'}</span>
+          {showBreakdown ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+        </button>
+        <AnimatePresence initial={false}>
+          {showBreakdown && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3 }}
+              className="overflow-hidden"
+            >
+              <div className="pt-4">
+                <RoundBreakdown game={game} />
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </motion.div>
 
       <motion.div

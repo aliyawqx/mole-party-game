@@ -1,11 +1,16 @@
 'use client';
 
 import { create } from 'zustand';
-import type { Game, GamePhase, ClueEntry, BanterLine, Participant } from '../engine/types';
+import type { Game, GamePhase, ClueEntry, BanterLine, Participant, ThemeKey } from '../engine/types';
 import { createGame, type HumanSeed } from '../engine/setup';
 import { applyCancellation, isCorrectGuess } from '../engine/cancellation';
 import { mockGenerateClues, mockGenerateBanter } from '../mock-clues';
 import { BOTS } from '../bots';
+import { PACK_KEYS } from '../word-packs';
+
+function pickRandomTheme(): ThemeKey {
+  return PACK_KEYS[Math.floor(Math.random() * PACK_KEYS.length)];
+}
 
 const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK === '1';
 
@@ -98,7 +103,7 @@ export const useLocalStore = create<LocalStore>((set, get) => ({
   moleMonologue: null,
 
   startGame: (humans) => {
-    const game = createGame('local', humans);
+    const game = createGame('local', humans, pickRandomTheme());
     set({
       game,
       phase: isHumanMole(game) ? 'mole-briefing-pass' : 'clue-pass',

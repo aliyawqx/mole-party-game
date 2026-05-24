@@ -2,6 +2,8 @@ export type Mode = 'solo' | 'local' | 'online';
 
 export type BotKey = 'professor' | 'memer' | 'edith' | 'poet' | 'engineer';
 
+export type ThemeKey = 'general' | 'food' | 'movies' | 'animals' | 'scifi';
+
 export type Tactic = 'A' | 'B';
 
 export type GamePhase =
@@ -56,6 +58,7 @@ export type AccusationVote = {
 
 export type Game = {
   mode: Mode;
+  theme: ThemeKey;
   participants: Participant[];
   moleId: string;
   guesserOrder: string[];

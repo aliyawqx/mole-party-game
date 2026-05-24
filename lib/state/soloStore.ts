@@ -1,10 +1,15 @@
 'use client';
 
 import { create } from 'zustand';
-import type { Game, GamePhase, ClueEntry, BanterLine } from '../engine/types';
+import type { Game, GamePhase, ClueEntry, BanterLine, ThemeKey } from '../engine/types';
 import { createGame } from '../engine/setup';
 import { applyCancellation, isCorrectGuess } from '../engine/cancellation';
 import { mockGenerateClues, mockGenerateBanter } from '../mock-clues';
+import { PACK_KEYS } from '../word-packs';
+
+function pickRandomTheme(): ThemeKey {
+  return PACK_KEYS[Math.floor(Math.random() * PACK_KEYS.length)];
+}
 
 const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK === '1';
 
@@ -15,7 +20,7 @@ type SoloStore = {
   loadingMonologue: boolean;
   moleMonologue: string | null;
 
-  startNew: () => void;
+  startNew: (theme?: ThemeKey) => void;
   generateClues: () => Promise<void>;
   doCancellation: () => void;
   submitGuess: (guess: string | null) => Promise<void>;
@@ -35,8 +40,9 @@ export const useSoloStore = create<SoloStore>((set, get) => ({
   loadingMonologue: false,
   moleMonologue: null,
 
-  startNew: () => {
-    const game = createGame('solo', [{ name: 'You', avatar: '🫵' }]);
+  startNew: (theme) => {
+    const useTheme = theme ?? pickRandomTheme();
+    const game = createGame('solo', [{ name: 'You', avatar: '🫵' }], useTheme);
     // Solo skips mole-briefing; go straight to clues
     set({ game: { ...game, phase: 'clues' }, moleMonologue: null });
     // Kick off clue generation
