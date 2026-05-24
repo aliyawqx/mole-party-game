@@ -14,9 +14,10 @@ type Props = {
   monologue: string | null;
   loadingMonologue: boolean;
   onPlayAgain: () => void;
+  onMainMenu?: () => void;
 };
 
-export function RevealScreen({ game, monologue, loadingMonologue, onPlayAgain }: Props) {
+export function RevealScreen({ game, monologue, loadingMonologue, onPlayAgain, onMainMenu }: Props) {
   const mole = game.participants.find((p) => p.id === game.moleId);
   const score = computeScore(game);
   const accused = score.accusedId
@@ -195,6 +196,7 @@ export function RevealScreen({ game, monologue, loadingMonologue, onPlayAgain }:
         </button>
         <Link
           href="/"
+          onClick={() => onMainMenu?.()}
           className="px-6 py-3 rounded-xl font-medium bg-white/5 text-muted hover:bg-white/10 hover:text-foreground transition"
         >
           Main menu

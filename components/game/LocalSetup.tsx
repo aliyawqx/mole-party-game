@@ -16,10 +16,7 @@ type Props = {
 };
 
 export function LocalSetup({ onStart }: Props) {
-  const [humans, setHumans] = useState<HumanSeed[]>([
-    { name: 'Alex', avatar: '🦊' },
-    { name: 'Maya', avatar: '🐼' },
-  ]);
+  const [humans, setHumans] = useState<HumanSeed[]>([]);
   const [name, setName] = useState('');
   const [theme, setTheme] = useState<ThemeKey | null>(null);
 

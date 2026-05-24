@@ -276,6 +276,7 @@ export default function LocalPage() {
           monologue={moleMonologue}
           loadingMonologue={loadingMonologue}
           onPlayAgain={reset}
+          onMainMenu={reset}
         />
       </main>
     );

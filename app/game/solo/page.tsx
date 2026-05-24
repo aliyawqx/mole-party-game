@@ -25,6 +25,7 @@ export default function SoloPage() {
     submitGuess,
     goToNextRoundOrAccusation,
     castAccusation,
+    reset,
   } = useSoloStore();
 
   // Solo: show intro screen with theme picker before starting the game.
@@ -53,6 +54,7 @@ export default function SoloPage() {
           monologue={moleMonologue}
           loadingMonologue={loadingMonologue}
           onPlayAgain={startNew}
+          onMainMenu={reset}
         />
       </main>
     );
