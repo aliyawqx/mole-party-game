@@ -23,7 +23,7 @@ After 5 rounds, everyone votes on who the Mole was.
 |---|---|---|
 | **Solo** | 1 human vs 5 AI bots with distinct personalities | ✅ Ready |
 | **Pass-and-play** | 2–6 humans on one phone, AI fills empty seats — Mole could be anyone | ✅ Ready |
-| **Online** | Friends on different devices | 🚧 Coming soon |
+| **Online** | 2–6 friends on different devices via shareable 4-letter room code, real-time sync over WebSockets, AI fills empty seats | ✅ Ready (Beta) |
 
 ## The 5 AI bots
 
@@ -40,10 +40,11 @@ Each AI has a vivid personality that shapes their clues. The Mole role rotates r
 ## Tech
 
 - **Next.js 16** (App Router) + **React 19** + **TypeScript** + **Tailwind v4**
-- **Anthropic Claude API** (Sonnet 4.6) — drives all bot clues, banter, Mole tactics, and the final reveal monologue
-- **Zustand** for client state, separate stores per mode (mode-agnostic engine underneath)
-- **Framer Motion** for animations
-- **Vercel** for deploy (auto-deploy on git push)
+- **Anthropic Claude API** (Sonnet 4.6) — drives bot clues, banter, Mole tactics, and the final reveal monologue when `ANTHROPIC_API_KEY` is set; otherwise a richer mock generator with per-personality fallbacks
+- **Zustand** for client state in Solo and Pass-and-play (mode-agnostic engine underneath)
+- **PartyKit** (Cloudflare Durable Objects) for **Online** real-time multiplayer rooms — server-authoritative game state, WebSocket sync, server-side Mole identity privacy
+- **Framer Motion** + **canvas-confetti** for animations and celebration
+- **Vercel** for the web app, **PartyKit cloud** for the room server (auto-deploy from git)
 
 ## AI is the gameplay, not the decoration
 
@@ -60,15 +61,23 @@ Each AI bot has its own system prompt with a personality, a temperature setting,
 git clone https://github.com/aliyawqx/mole-party-game.git
 cd mole-party-game
 npm install
-cp .env.local.example .env.local       # add your ANTHROPIC_API_KEY
-npm run dev
+cp .env.local.example .env.local       # add your ANTHROPIC_API_KEY (optional)
+npm run dev                            # Next.js on :3000
+npx partykit dev                       # PartyKit (Online mode) on :1999
 ```
 
 Open [http://localhost:3000](http://localhost:3000).
 
-To run without an API key (mock clues for development):
+To run without an API key (mock clues for development — same setup the production demo uses):
 ```bash
 NEXT_PUBLIC_USE_MOCK=1 npm run dev
+```
+
+To deploy the PartyKit server (Online mode):
+```bash
+npx partykit login
+npx partykit deploy
+# then set NEXT_PUBLIC_PARTYKIT_HOST=<your>.partykit.dev in Vercel envvars
 ```
 
 ## Recording the demo video (≤60 seconds)
