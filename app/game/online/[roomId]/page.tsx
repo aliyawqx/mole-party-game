@@ -11,6 +11,9 @@ import type { Participant, ClueEntry, BanterLine, AccusationVote } from '@/lib/e
 import { ClueCard } from '@/components/game/ClueCard';
 import { GuessInput } from '@/components/game/GuessInput';
 import { ThemeBadge } from '@/components/game/ThemeBadge';
+import { RoundBreakdown } from '@/components/game/RoundBreakdown';
+import { ChevronDown, ChevronUp, Scroll } from 'lucide-react';
+import type { Game } from '@/lib/engine/types';
 
 type OnlinePhase =
   | 'lobby'
@@ -684,6 +687,7 @@ function FinalRevealPhase({
   mole: Participant | null;
   moleIdRevealed: string | null;
 }) {
+  const [showBreakdown, setShowBreakdown] = useState(false);
   // Tally accusations from view.rounds (we don't have it; need server to send acc tally)
   // For simplicity, just show Mole identity + monologue + team score
   useEffect(() => {
@@ -694,6 +698,23 @@ function FinalRevealPhase({
       colors: ['#A855F7', '#EC4899', '#22C55E'],
     });
   }, []);
+
+  // Construct a synthetic Game for RoundBreakdown
+  const syntheticGame: Game | null = moleIdRevealed
+    ? {
+        mode: 'online',
+        theme: view.theme ?? 'general',
+        participants: view.participants,
+        moleId: moleIdRevealed,
+        guesserOrder: [],
+        currentRound: view.totalRounds - 1,
+        rounds: view.rounds,
+        phase: 'final-reveal',
+        accusations: [],
+        teamScore: view.teamScore,
+        wordsUsed: view.rounds.map((r) => r.word),
+      }
+    : null;
   return (
     <Shell title="Game over">
       <div className="flex-1 flex flex-col items-center justify-center px-4 py-10 gap-6 max-w-2xl mx-auto w-full">
@@ -734,6 +755,27 @@ function FinalRevealPhase({
             </div>
           </div>
         </div>
+        {syntheticGame && (
+          <div className="w-full">
+            <button
+              onClick={() => setShowBreakdown((v) => !v)}
+              className="
+                w-full flex items-center justify-center gap-2 py-3
+                text-sm font-medium text-muted hover:text-foreground transition
+                border border-border rounded-xl hover:bg-card-hover
+              "
+            >
+              <Scroll size={14} />
+              <span>{showBreakdown ? 'Hide round breakdown' : 'See round-by-round replay'}</span>
+              {showBreakdown ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+            </button>
+            {showBreakdown && (
+              <div className="pt-4">
+                <RoundBreakdown game={syntheticGame} />
+              </div>
+            )}
+          </div>
+        )}
         <div className="flex gap-3">
           <Link
             href="/game/online"
