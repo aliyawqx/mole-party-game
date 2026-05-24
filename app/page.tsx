@@ -136,65 +136,71 @@ export default function Home() {
                 className="ml-auto text-muted transition-transform group-open:rotate-90"
               />
             </summary>
-            <div className="px-6 pb-6 space-y-4 text-sm leading-relaxed text-foreground/90">
-              {/* The twist first */}
+            <div className="px-6 pb-6 space-y-5 text-sm leading-relaxed text-foreground/90">
+              {/* Hook */}
+              <div className="text-base text-foreground/95">
+                Mole is <strong>two games at once</strong>: a cooperative word puzzle, layered with a hunt for an AI saboteur. Not &quot;ask questions and find the imposter&quot; — the clues themselves are the evidence.
+              </div>
+
+              {/* Layer 1: the puzzle */}
+              <div className="bg-accent/5 border border-accent/30 rounded-xl p-4 space-y-2">
+                <div className="text-accent-strong font-bold flex items-center gap-2">
+                  <span>1.</span>
+                  <span>The cooperative puzzle</span>
+                </div>
+                <p>
+                  Each round, 5 AI bots see a secret word and write a <strong>single one-word clue</strong> in their own voice. The most obvious clue (&quot;water&quot; for RIVER) is dangerous: if two bots write the same word, <strong>both clues cancel</strong> and disappear. You — the guesser — see only the survivors. Your team scores by guessing the word.
+                </p>
+                <p className="text-xs text-muted">
+                  This is the Just One mechanic — being too obvious is how you lose clues.
+                </p>
+              </div>
+
+              {/* Layer 2: the AI Mole */}
               <div className="bg-pink/5 border border-pink/30 rounded-xl p-4 space-y-2">
-                <div className="text-pink font-bold text-base">
-                  🎭 The twist
+                <div className="text-pink font-bold flex items-center gap-2">
+                  <span>2.</span>
+                  <span>The AI Mole 🎭</span>
                 </div>
                 <p>
-                  Of the 6 players, <strong>one is secretly the Mole</strong> — a traitor on your team. Nobody knows who.
+                  Every game, <strong>one bot is secretly the Mole</strong>. Its language model is given a hidden mission with one of two tactics:
                 </p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
-                  <div className="bg-card border border-border rounded-lg p-3">
-                    <div className="text-[10px] uppercase tracking-wider text-success font-mono mb-1">
-                      Team&apos;s goal
-                    </div>
-                    <div>
-                      Find the Mole through 5 rounds of evidence, then vote them out.
-                    </div>
-                  </div>
-                  <div className="bg-card border border-border rounded-lg p-3">
-                    <div className="text-[10px] uppercase tracking-wider text-pink font-mono mb-1">
-                      Mole&apos;s goal
-                    </div>
-                    <div>
-                      Sabotage clues without getting caught. Survive the vote.
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Round mechanic */}
-              <div>
-                <div className="font-bold text-base mb-2">How a round works</div>
-                <ol className="list-decimal list-inside space-y-1.5">
+                <ul className="space-y-1.5 ml-4">
                   <li>
-                    A secret word is shown to everyone except the{" "}
-                    <strong>Guesser</strong>.
+                    <span className="text-pink font-semibold">Misdirection</span> — write a defensible clue that pulls the guesser toward the <em>wrong</em> meaning (for BANK, write &quot;money&quot; to push you away from river-bank).
                   </li>
                   <li>
-                    Every other player (including the Mole) writes a{" "}
-                    <strong>single one-word clue</strong>.
+                    <span className="text-pink font-semibold">Collision</span> — predict what an obvious bot would write, and write the same word on purpose to <em>cancel a useful clue</em>.
                   </li>
-                  <li>
-                    Clues that <strong>match or are synonyms</strong> cancel out — the guesser only sees what survives.
-                  </li>
-                  <li>
-                    The Guesser tries to deduce the word.
-                  </li>
-                </ol>
-                <p className="mt-3 text-muted text-xs">
-                  The Mole hides in plain sight — writes clues like everyone else, but picks ones that mislead the guesser (e.g. for BANK they write &quot;money&quot;, pushing you away from river-bank) or that collide with another player&apos;s likely clue to cancel useful hints.
+                </ul>
+                <p>
+                  The catch: <strong>the Mole stays in its personality voice the whole time</strong> — kai still uses meme references, Albert still uses obscure vocab. You can&apos;t just look for a &quot;weird bot&quot; — you have to read patterns across 5 rounds.
                 </p>
               </div>
 
-              {/* End game */}
-              <div>
-                <div className="font-bold text-base mb-2">After 5 rounds</div>
+              {/* Layer 3: detective work */}
+              <div className="bg-success/5 border border-success/30 rounded-xl p-4 space-y-2">
+                <div className="text-success font-bold flex items-center gap-2">
+                  <span>3.</span>
+                  <span>Your detective work</span>
+                </div>
                 <p>
-                  Everyone votes on <strong>who they think is the Mole</strong>. If the majority is right — team wins. If wrong — the Mole escapes and wins.
+                  After 5 rounds, accuse one bot of being the Mole. Right — your team wins. Wrong — the Mole wins. After the reveal, replay the rounds and see <strong>exactly which tactic the AI used and when</strong>.
                 </p>
+              </div>
+
+              {/* Not vs other games */}
+              <div className="text-xs text-muted border-t border-border pt-4 space-y-1">
+                <div className="font-semibold text-foreground/70 mb-1">Why it&apos;s not Spyfall / Mafia</div>
+                <div>
+                  • You play <strong>against language models</strong>, not other humans pretending — every game has a fresh saboteur strategy.
+                </div>
+                <div>
+                  • No questioning round. <strong>The clues themselves are the evidence</strong> — you read the bots like a closed book.
+                </div>
+                <div>
+                  • Two win conditions stacked: <strong>cooperative word-guessing</strong> and <strong>traitor detection</strong>. Either or both can fail.
+                </div>
               </div>
             </div>
           </details>
