@@ -3,12 +3,15 @@ import { Users, User, Globe, ArrowRight, Sparkles } from "lucide-react";
 import { CancellationDemo } from "@/components/landing/CancellationDemo";
 import { BotShowcase } from "@/components/landing/BotShowcase";
 import { PackRow } from "@/components/landing/PackRow";
+import { TopNav } from "@/components/landing/TopNav";
 
 export default function Home() {
   return (
     <main className="min-h-screen">
+      <TopNav />
+
       {/* HERO */}
-      <section className="relative px-6 pt-16 pb-12 sm:pt-24 sm:pb-16">
+      <section className="relative px-6 pt-12 pb-12 sm:pt-20 sm:pb-16">
         <div className="max-w-5xl mx-auto flex flex-col items-center gap-8">
           <div className="text-center space-y-4 animate-fade-in">
             <div className="text-7xl sm:text-8xl">🎭</div>
@@ -59,28 +62,28 @@ export default function Home() {
       </section>
 
       {/* CANCELLATION DEMO */}
-      <section className="px-6 py-10">
+      <section id="how" className="px-6 py-10 scroll-mt-16">
         <div className="max-w-2xl mx-auto">
           <CancellationDemo />
         </div>
       </section>
 
       {/* BOT SHOWCASE */}
-      <section className="px-6 py-12">
+      <section id="bots" className="px-6 py-12 scroll-mt-16">
         <div className="max-w-5xl mx-auto">
           <BotShowcase />
         </div>
       </section>
 
       {/* PACK ROW */}
-      <section className="px-6 py-10">
+      <section id="packs" className="px-6 py-10 scroll-mt-16">
         <div className="max-w-3xl mx-auto">
           <PackRow />
         </div>
       </section>
 
       {/* MODE PICKER */}
-      <section className="px-6 py-12">
+      <section id="modes" className="px-6 py-12 scroll-mt-16">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-8">
             <div className="text-[10px] uppercase tracking-[0.3em] text-muted font-mono mb-1">
@@ -162,19 +165,6 @@ export default function Home() {
         </div>
       </section>
 
-      <footer className="px-6 py-8 text-center text-xs text-muted/60 font-mono space-y-1">
-        <div>nFactorial hackathon · solo build · 24 May 2026</div>
-        <div>
-          <a
-            href="https://github.com/aliyawqx/mole-party-game"
-            className="hover:text-foreground transition"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            github.com/aliyawqx/mole-party-game
-          </a>
-        </div>
-      </footer>
     </main>
   );
 }
