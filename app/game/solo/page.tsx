@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
+import confetti from 'canvas-confetti';
 import { useSoloStore } from '@/lib/state/soloStore';
 import { ParticipantSidebar } from '@/components/game/ParticipantSidebar';
 import { ClueCard } from '@/components/game/ClueCard';
@@ -216,6 +217,17 @@ function RevealPanel({
   guess: string | null;
   word: string;
 }) {
+  useEffect(() => {
+    if (correct) {
+      confetti({
+        particleCount: 80,
+        spread: 70,
+        origin: { y: 0.55 },
+        colors: ['#22C55E', '#A855F7', '#EC4899'],
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   return (
     <div className="text-center">
       <div

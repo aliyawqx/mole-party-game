@@ -1,7 +1,9 @@
 'use client';
 
+import { useEffect } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
+import confetti from 'canvas-confetti';
 import type { Game } from '@/lib/engine/types';
 import { computeScore } from '@/lib/engine/scoring';
 
@@ -18,6 +20,18 @@ export function RevealScreen({ game, monologue, loadingMonologue, onPlayAgain }:
   const accused = score.accusedId
     ? game.participants.find((p) => p.id === score.accusedId)
     : null;
+
+  // Confetti on team win (Mole caught)
+  useEffect(() => {
+    if (!score.moleWins) {
+      const fire = (opts: confetti.Options) =>
+        confetti({ particleCount: 80, spread: 70, origin: { y: 0.7 }, ...opts });
+      fire({ colors: ['#A855F7', '#EC4899', '#22C55E'] });
+      setTimeout(() => fire({ angle: 60, spread: 55, origin: { x: 0, y: 0.7 } }), 200);
+      setTimeout(() => fire({ angle: 120, spread: 55, origin: { x: 1, y: 0.7 } }), 400);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className="w-full max-w-2xl mx-auto flex flex-col items-center gap-6 py-10 px-4">

@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { motion } from 'framer-motion';
+import confetti from 'canvas-confetti';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { useLocalStore } from '@/lib/state/localStore';
@@ -41,6 +42,19 @@ export default function LocalPage() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Fire confetti on correct round guess in reveal phase
+  useEffect(() => {
+    if (phase === 'reveal' && game && game.rounds[game.currentRound]?.correct) {
+      confetti({
+        particleCount: 70,
+        spread: 60,
+        origin: { y: 0.55 },
+        colors: ['#22C55E', '#A855F7', '#EC4899'],
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase]);
 
   // SETUP phase — no game yet
   if (!game || phase === 'setup') {
