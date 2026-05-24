@@ -1,0 +1,38 @@
+- generic [active] [ref=e1]:
+  - main [ref=e2]:
+    - generic [ref=e3]:
+      - generic [ref=e4]:
+        - generic [ref=e5]: 🎭
+        - heading "MOLE" [level=1] [ref=e6]
+        - paragraph [ref=e7]:
+          - text: An AI party word game.
+          - text: One of the players is secretly a traitor.
+      - generic [ref=e8]:
+        - link "Solo Play vs 5 AI bots Ready" [ref=e9] [cursor=pointer]:
+          - /url: /game/solo
+          - generic [ref=e10]:
+            - img [ref=e12]
+            - generic [ref=e15]:
+              - generic [ref=e16]: Solo
+              - generic [ref=e17]: Play vs 5 AI bots
+            - generic [ref=e18]: Ready
+        - link "Pass-and-play 2–6 friends, one phone Ready" [ref=e19] [cursor=pointer]:
+          - /url: /game/local
+          - generic [ref=e20]:
+            - img [ref=e22]
+            - generic [ref=e27]:
+              - generic [ref=e28]: Pass-and-play
+              - generic [ref=e29]: 2–6 friends, one phone
+            - generic [ref=e30]: Ready
+        - generic [ref=e31]:
+          - img [ref=e33]
+          - generic [ref=e36]:
+            - generic [ref=e37]: Online
+            - generic [ref=e38]: Play with friends across devices
+          - generic [ref=e39]: Coming soon
+      - group [ref=e40]:
+        - generic "How to play" [ref=e41] [cursor=pointer]:
+          - img [ref=e42]
+          - generic [ref=e45]: How to play
+      - generic [ref=e46]: nFactorial hackathon · solo build · 24 May 2026
+  - alert [ref=e47]

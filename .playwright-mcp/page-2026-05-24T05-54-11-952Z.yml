@@ -1,0 +1,35 @@
+- generic [active] [ref=e1]:
+  - main [ref=e2]:
+    - generic [ref=e253]:
+      - link "Menu" [ref=e254] [cursor=pointer]:
+        - /url: /
+        - img [ref=e255]
+        - generic [ref=e257]: Menu
+      - generic [ref=e258]: MOLE · Solo
+    - generic [ref=e284]:
+      - generic [ref=e285]:
+        - generic [ref=e286]: 🎭
+        - generic [ref=e287]: The Mole was…
+        - generic [ref=e288]: 🎓
+        - generic [ref=e289]: Albert
+      - paragraph [ref=e291]: “Slipped right past you. I'm Albert.”
+      - generic [ref=e292]:
+        - generic [ref=e293]:
+          - generic [ref=e294]: Words
+          - generic [ref=e295]:
+            - text: "0"
+            - generic [ref=e296]: /5
+        - generic [ref=e297]:
+          - generic [ref=e298]: Accusation
+          - generic [ref=e299]: WRONG
+          - generic [ref=e300]: 🔧 Otto
+        - generic [ref=e301]:
+          - generic [ref=e302]: Verdict
+          - generic [ref=e303]: MOLE WINS
+      - generic [ref=e304]:
+        - button "Play again" [ref=e305]
+        - link "Main menu" [ref=e306] [cursor=pointer]:
+          - /url: /
+  - button "Open Next.js Dev Tools" [ref=e81] [cursor=pointer]:
+    - img [ref=e82]
+  - alert [ref=e85]
