@@ -37,12 +37,11 @@ export default function Home() {
             badge="Ready"
           />
           <ModeCard
-            href="#"
+            href="/game/online"
             icon={<Globe size={22} />}
             title="Online"
             subtitle="Play with friends across devices"
-            badge="Coming soon"
-            disabled
+            badge="Beta"
           />
         </div>
 
