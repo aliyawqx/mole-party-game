@@ -110,7 +110,6 @@ export default function Home() {
               line1="Pass the phone for each turn"
               line2="The Mole could be a human or AI"
               tone="ready"
-              highlighted
             />
             <ModeCard
               href="/game/online"
@@ -228,7 +227,6 @@ function ModeCard({
   line1,
   line2,
   tone,
-  highlighted,
 }: {
   href: string;
   icon: React.ReactNode;
@@ -237,24 +235,17 @@ function ModeCard({
   line1: string;
   line2: string;
   tone: "ready" | "soon";
-  highlighted?: boolean;
 }) {
   return (
     <Link
       href={href}
-      className={`
+      className="
         group relative flex flex-col gap-3 p-5 rounded-2xl border transition-all
-        ${highlighted
-          ? "border-accent/50 bg-gradient-to-br from-accent/10 via-card to-card hover:border-accent"
-          : "border-border bg-card hover:border-accent/40 hover:bg-card-hover"}
-      `}
+        border-border bg-card hover:border-accent/50 hover:bg-card-hover
+      "
     >
       <div className="flex items-center justify-between">
-        <div
-          className={`flex h-11 w-11 items-center justify-center rounded-xl ${
-            highlighted ? "bg-accent/20 text-accent-strong" : "bg-white/5 text-accent-strong"
-          }`}
-        >
+        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/5 text-accent-strong group-hover:bg-accent/15 transition-colors">
           {icon}
         </div>
         <span
